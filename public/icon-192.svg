@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" role="img" aria-label="Annapurna icon">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#c45c26"/>
+      <stop offset="100%" stop-color="#e09a3d"/>
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="42" fill="#1c1410"/>
+  <rect x="22" y="22" width="148" height="148" rx="32" fill="url(#g)"/>
+  <path d="M55 118c15-23 38-42 66-53 10-4 22-7 35-8-18 17-31 35-39 56-9 23-15 35-28 48-12-8-22-24-34-43z" fill="#fffaf3" opacity="0.96"/>
+  <circle cx="96" cy="74" r="16" fill="#fffaf3" opacity="0.9"/>
+</svg>
