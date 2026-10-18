@@ -9,7 +9,8 @@ const links = [
   { to: "/conversions", label: "Unit conversion", need: "masters" as const },
   { to: "/menu", label: "Menu master", need: "masters" as const },
   { to: "/purchase", label: "Purchase", need: "purchase" as const },
-  { to: "/recipes", label: "Sub recipe & recipe", need: "recipes" as const },
+  { to: "/sub-recipes", label: "Sub recipes", need: "recipes" as const },
+  { to: "/menu-recipes", label: "Menu recipes", need: "recipes" as const },
   { to: "/reports", label: "Costing reports", need: "reports" as const },
 ];
 
@@ -22,11 +23,14 @@ export function Layout() {
       <button className="menu-toggle" onClick={() => setOpen((v) => !v)}>
         Menu
       </button>
-      <aside className={`sidebar ${open ? "open" : ""}`} onClick={() => setOpen(false)}>
+      <aside
+        className={`sidebar ${open ? "open" : ""}`}
+        onClick={() => setOpen(false)}
+      >
         <div className="side-brand">
-          <div className="brand-mark">A</div>
+          <div className="brand-mark">D</div>
           <div>
-            <h1>Annapurna</h1>
+            <h1>DPs</h1>
             <small>Item-level recipe costing</small>
           </div>
         </div>
@@ -37,7 +41,7 @@ export function Layout() {
               <NavLink key={l.to} to={l.to} end={l.to === "/"}>
                 {l.label}
               </NavLink>
-            ) : null
+            ) : null,
           )}
         </nav>
         <div className="nav-label">Operations</div>
@@ -47,7 +51,7 @@ export function Layout() {
               <NavLink key={l.to} to={l.to}>
                 {l.label}
               </NavLink>
-            ) : null
+            ) : null,
           )}
         </nav>
         <div className="side-user">
@@ -58,7 +62,11 @@ export function Layout() {
           </div>
           <button
             className="btn ghost small"
-            style={{ marginTop: 12, color: "#f3e7d8", borderColor: "rgba(255,255,255,.2)" }}
+            style={{
+              marginTop: 12,
+              color: "#f3e7d8",
+              borderColor: "rgba(255,255,255,.2)",
+            }}
             onClick={() => {
               logout();
               nav("/login");

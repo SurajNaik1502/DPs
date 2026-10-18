@@ -55,6 +55,14 @@ export interface Purchase {
   createdBy: string;
 }
 
+export interface RecipeBatch {
+  id: string;
+  madeAt: string;
+  qty: number;
+  unitId: string;
+  notes?: string;
+}
+
 export interface RecipeLine {
   id: string;
   source: LineSource;
@@ -72,6 +80,7 @@ export interface Recipe {
   yieldUnitId: string;
   notes: string;
   lines: RecipeLine[];
+  batches?: RecipeBatch[];
   sellingPrice?: number;
   menuGroup?: string;
 }
@@ -98,5 +107,5 @@ export interface AppState {
   menu: MenuItem[];
 }
 
-export const STORAGE_KEY = "annapurna-recipe-db-v1";
-export const SESSION_KEY = "annapurna-session-user";
+export const STORAGE_KEY = "dps-recipe-db-v1";
+export const SESSION_KEY = "dps-session-user";

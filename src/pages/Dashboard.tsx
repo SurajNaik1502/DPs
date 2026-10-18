@@ -17,7 +17,9 @@ export function Dashboard() {
       <div className="page-head">
         <div>
           <h2>Good afternoon, {user?.name.split(" ")[0]}.</h2>
-          <p className="muted">Working kitchen: Idli · Sambar · Coconut chutney</p>
+          <p className="muted">
+            Working kitchen: Idli · Sambar · Coconut chutney
+          </p>
         </div>
         <Link className="btn" to="/reports">
           Open costing reports
@@ -36,7 +38,9 @@ export function Dashboard() {
         </div>
         <div className="stat">
           <span>Batter / kg</span>
-          <strong>{batter ? fmtMoney(costPerKg(state, batter).perKg ?? 0) : "—"}</strong>
+          <strong>
+            {batter ? fmtMoney(costPerKg(state, batter).perKg ?? 0) : "—"}
+          </strong>
           <em>Sub recipe SR-001</em>
         </div>
         <div className="stat">
@@ -47,36 +51,44 @@ export function Dashboard() {
       </div>
       <div className="dash-split">
         <div className="card">
-          <h3 style={{ fontFamily: "Fraunces, serif", marginTop: 0 }}>Build of the plate</h3>
+          <h3 style={{ fontFamily: "Fraunces, serif", marginTop: 0 }}>
+            Build of the plate
+          </h3>
           {plate && (
             <div className="recipe-tree">
               <div className="tree-item">
-                <b>{plate.name}</b> — {fmtMoney(recipeCost(state, plate).total)} / plate
+                <b>{plate.name}</b> — {fmtMoney(recipeCost(state, plate).total)}{" "}
+                / plate
               </div>
               {batter && (
                 <div className="tree-item">
-                  4 steamed idlis from <b>{batter.name}</b> · {fmtMoney(costPerKg(state, batter).perKg ?? 0)} / kg
+                  4 steamed idlis from <b>{batter.name}</b> ·{" "}
+                  {fmtMoney(costPerKg(state, batter).perKg ?? 0)} / kg
                 </div>
               )}
               {sambar && (
                 <div className="tree-item">
-                  150 g <b>{sambar.name}</b> · {fmtMoney(costPerKg(state, sambar).perKg ?? 0)} / kg
+                  150 g <b>{sambar.name}</b> ·{" "}
+                  {fmtMoney(costPerKg(state, sambar).perKg ?? 0)} / kg
                 </div>
               )}
               {chutney && (
                 <div className="tree-item">
-                  40 g <b>{chutney.name}</b> · {fmtMoney(costPerKg(state, chutney).perKg ?? 0)} / kg
+                  40 g <b>{chutney.name}</b> ·{" "}
+                  {fmtMoney(costPerKg(state, chutney).perKg ?? 0)} / kg
                 </div>
               )}
             </div>
           )}
           <p className="muted" style={{ marginTop: 16 }}>
-            Cost rolls from purchase batches (weighted average, tax + freight) through item
+            Cost rolls from latest purchase prices, tax + freight through item
             conversions into sub-recipes, then into the menu plate.
           </p>
         </div>
         <div className="card">
-          <h3 style={{ fontFamily: "Fraunces, serif", marginTop: 0 }}>Menu contribution</h3>
+          <h3 style={{ fontFamily: "Fraunces, serif", marginTop: 0 }}>
+            Menu contribution
+          </h3>
           <table>
             <thead>
               <tr>

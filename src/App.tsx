@@ -13,13 +13,7 @@ import { Units } from "./pages/Units";
 import { useStore } from "./store/db";
 import type { Role } from "./types";
 
-function Guard({
-  children,
-  roles,
-}: {
-  children: ReactNode;
-  roles?: Role[];
-}) {
+function Guard({ children, roles }: { children: ReactNode; roles?: Role[] }) {
   const { user } = useStore();
   if (!user) return <Navigate to="/login" replace />;
   if (roles && !roles.includes(user.role)) return <Navigate to="/" replace />;
@@ -43,7 +37,8 @@ export default function App() {
         <Route path="/conversions" element={<Conversions />} />
         <Route path="/menu" element={<MenuPage />} />
         <Route path="/purchase" element={<PurchasePage />} />
-        <Route path="/recipes" element={<Recipes />} />
+        <Route path="/sub-recipes" element={<Recipes kind="sub" />} />
+        <Route path="/menu-recipes" element={<Recipes kind="menu" />} />
         <Route path="/reports" element={<Reports />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

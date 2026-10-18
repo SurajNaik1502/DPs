@@ -21,7 +21,10 @@ export interface BatchCostRow {
   costPerKg: number | null;
 }
 
-export function batchCostsForItem(state: AppState, itemId: string): BatchCostRow[] {
+export function batchCostsForItem(
+  state: AppState,
+  itemId: string,
+): BatchCostRow[] {
   const item = state.items.find((x) => x.id === itemId);
   if (!item) return [];
   return itemPurchases(state, itemId).map((p) => {
@@ -39,7 +42,29 @@ export function batchCostsForItem(state: AppState, itemId: string): BatchCostRow
   });
 }
 
-export function weightedAvgRate(state: AppState, itemId: string): number | null {
+export function latestPurchaseRate(
+  state: AppState,
+  itemId: string,
+): number | null {
+  const item = state.items.find((x) => x.id === itemId);
+  if (!item) return null;
+  const latest = itemPurchases(state, itemId).at(-1);
+  if (!latest) return null;
+  const qtyBase = convertQty(
+    state,
+    latest.qty,
+    latest.unitId,
+    item.baseUnitId,
+    itemId,
+  );
+  if (qtyBase == null || qtyBase <= 0) return null;
+  return landedCost(latest) / qtyBase;
+}
+
+export function weightedAvgRate(
+  state: AppState,
+  itemId: string,
+): number | null {
   const item = state.items.find((x) => x.id === itemId);
   if (!item) return null;
   let value = 0;
@@ -58,11 +83,12 @@ export function costForItemQty(
   state: AppState,
   itemId: string,
   qty: number,
-  unitId: string
+  unitId: string,
 ): { cost: number | null; reason?: string } {
   const item = state.items.find((x) => x.id === itemId);
   if (!item) return { cost: null, reason: "Item missing" };
-  const rate = weightedAvgRate(state, itemId);
+  const rate =
+    latestPurchaseRate(state, itemId) ?? weightedAvgRate(state, itemId);
   if (rate == null) return { cost: null, reason: "No rate" };
   const qtyBase = convertQty(state, qty, unitId, item.baseUnitId, itemId);
   if (qtyBase == null) {
@@ -89,13 +115,18 @@ export function explodeRecipe(
   state: AppState,
   recipe: Recipe,
   multiplier = 1,
-  path = recipe.name
+  path = recipe.name,
 ): ExplodedLine[] {
   const rows: ExplodedLine[] = [];
   for (const line of recipe.lines) {
     if (line.source === "item") {
       const item = state.items.find((x) => x.id === line.refId);
-      const { cost, reason } = costForItemQty(state, line.refId, line.qty * multiplier, line.unitId);
+      const { cost, reason } = costForItemQty(
+        state,
+        line.refId,
+        line.qty * multiplier,
+        line.unitId,
+      );
       rows.push({
         path,
         recipeName: recipe.name,
@@ -121,7 +152,12 @@ export function explodeRecipe(
         });
         continue;
       }
-      const childQty = convertQty(state, line.qty * multiplier, line.unitId, child.yieldUnitId);
+      const childQty = convertQty(
+        state,
+        line.qty * multiplier,
+        line.unitId,
+        child.yieldUnitId,
+      );
       if (childQty == null) {
         rows.push({
           path,
@@ -145,13 +181,19 @@ export function explodeRecipe(
         unitId: line.unitId,
         cost: recipeCost(state, child).total * childMult,
       });
-      rows.push(...explodeRecipe(state, child, childMult, `${path} → ${child.name}`));
+      rows.push(
+        ...explodeRecipe(state, child, childMult, `${path} → ${child.name}`),
+      );
     }
   }
   return rows;
 }
 
-export function recipeCost(state: AppState, recipe: Recipe, seen = new Set<string>()) {
+export function recipeCost(
+  state: AppState,
+  recipe: Recipe,
+  seen = new Set<string>(),
+) {
   if (seen.has(recipe.id)) {
     return { total: 0, error: "Circular recipe" };
   }
@@ -164,7 +206,12 @@ export function recipeCost(state: AppState, recipe: Recipe, seen = new Set<strin
     } else {
       const child = state.recipes.find((x) => x.id === line.refId);
       if (!child) continue;
-      const childQty = convertQty(state, line.qty, line.unitId, child.yieldUnitId);
+      const childQty = convertQty(
+        state,
+        line.qty,
+        line.unitId,
+        child.yieldUnitId,
+      );
       if (childQty == null || child.yieldQty <= 0) continue;
       const nested = recipeCost(state, child, new Set(seen));
       total += nested.total * (childQty / child.yieldQty);
@@ -176,7 +223,8 @@ export function recipeCost(state: AppState, recipe: Recipe, seen = new Set<strin
 export function costPerKg(state: AppState, recipe: Recipe) {
   const { total } = recipeCost(state, recipe);
   const kg = convertToKg(state, recipe.yieldQty, recipe.yieldUnitId);
-  if (kg == null || kg <= 0) return { perKg: null as number | null, yieldKg: kg, total };
+  if (kg == null || kg <= 0)
+    return { perKg: null as number | null, yieldKg: kg, total };
   return { perKg: total / kg, yieldKg: kg, total };
 }
 
@@ -186,7 +234,12 @@ export function costPerYieldUnit(state: AppState, recipe: Recipe) {
   return total / recipe.yieldQty;
 }
 
-export function portionCost(state: AppState, recipe: Recipe, qty: number, unitId: string) {
+export function portionCost(
+  state: AppState,
+  recipe: Recipe,
+  qty: number,
+  unitId: string,
+) {
   const batch = recipeCost(state, recipe).total;
   const used = convertQty(state, qty, unitId, recipe.yieldUnitId);
   if (used == null || recipe.yieldQty <= 0) return null;
@@ -206,7 +259,8 @@ export function menuCosting(state: AppState) {
         marginPct: 100,
       };
     }
-    const usedCost = portionCost(state, recipe, m.portionQty, m.portionUnitId) ?? 0;
+    const usedCost =
+      portionCost(state, recipe, m.portionQty, m.portionUnitId) ?? 0;
     const { perKg } = costPerKg(state, recipe);
     const margin = m.sellingPrice - usedCost;
     return {

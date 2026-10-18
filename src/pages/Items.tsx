@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Modal } from "../components/Modal";
-import { weightedAvgRate } from "../lib/costing";
+import { latestPurchaseRate } from "../lib/costing";
 import { fmtMoney, unitCode } from "../lib/units";
 import { uid, useStore } from "../store/db";
 import type { Item, ItemKind } from "../types";
@@ -27,15 +27,22 @@ export function Items() {
         (i) =>
           i.name.toLowerCase().includes(q.toLowerCase()) ||
           i.code.toLowerCase().includes(q.toLowerCase()) ||
-          i.category.toLowerCase().includes(q.toLowerCase())
+          i.category.toLowerCase().includes(q.toLowerCase()),
       ),
-    [state.items, q]
+    [state.items, q],
   );
 
   const persist = (item: Item) => {
     const next = item.id
       ? state.items.map((x) => (x.id === item.id ? item : x))
-      : [...state.items, { ...item, id: uid("i"), code: item.code || `IRM-${state.items.length + 1}` }];
+      : [
+          ...state.items,
+          {
+            ...item,
+            id: uid("i"),
+            code: item.code || `IRM-${state.items.length + 1}`,
+          },
+        ];
     save({ ...state, items: next });
     setEdit(null);
   };
@@ -45,7 +52,10 @@ export function Items() {
       <div className="page-head">
         <div>
           <h2>Item master</h2>
-          <p className="muted">Raw materials at item level. Rates come from purchase batches.</p>
+          <p className="muted">
+            Raw materials at item level. Latest purchase rates are used for
+            costing.
+          </p>
         </div>
         {user?.role !== "kitchen" && (
           <button className="btn" onClick={() => setEdit(empty())}>
@@ -55,7 +65,11 @@ export function Items() {
       </div>
       <div className="card">
         <div className="toolbar">
-          <input placeholder="Search code, name, category" value={q} onChange={(e) => setQ(e.target.value)} />
+          <input
+            placeholder="Search code, name, category"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+          />
         </div>
         <table>
           <thead>
@@ -64,7 +78,7 @@ export function Items() {
               <th>Item</th>
               <th>Category</th>
               <th>Base</th>
-              <th className="num">Wtd. avg</th>
+              <th className="num">Latest price</th>
               <th></th>
             </tr>
           </thead>
@@ -80,9 +94,14 @@ export function Items() {
                   <span className="tag">{item.category}</span>
                 </td>
                 <td>{unitCode(state, item.baseUnitId)}</td>
-                <td className="num">{fmtMoney(weightedAvgRate(state, item.id) ?? 0)}</td>
+                <td className="num">
+                  {fmtMoney(latestPurchaseRate(state, item.id) ?? 0)}
+                </td>
                 <td>
-                  <button className="btn ghost small" onClick={() => setEdit(item)}>
+                  <button
+                    className="btn ghost small"
+                    onClick={() => setEdit(item)}
+                  >
                     Edit
                   </button>
                 </td>
@@ -92,21 +111,32 @@ export function Items() {
         </table>
       </div>
       {edit && (
-        <Modal title={edit.id ? "Edit item" : "New item"} onClose={() => setEdit(null)}>
+        <Modal
+          title={edit.id ? "Edit item" : "New item"}
+          onClose={() => setEdit(null)}
+        >
           <div className="form-grid">
             <div>
               <label>Code</label>
-              <input value={edit.code} onChange={(e) => setEdit({ ...edit, code: e.target.value })} />
+              <input
+                value={edit.code}
+                onChange={(e) => setEdit({ ...edit, code: e.target.value })}
+              />
             </div>
             <div>
               <label>Name</label>
-              <input value={edit.name} onChange={(e) => setEdit({ ...edit, name: e.target.value })} />
+              <input
+                value={edit.name}
+                onChange={(e) => setEdit({ ...edit, name: e.target.value })}
+              />
             </div>
             <div>
               <label>Kind</label>
               <select
                 value={edit.kind}
-                onChange={(e) => setEdit({ ...edit, kind: e.target.value as ItemKind })}
+                onChange={(e) =>
+                  setEdit({ ...edit, kind: e.target.value as ItemKind })
+                }
               >
                 <option value="raw">Raw</option>
                 <option value="packaging">Packaging</option>
@@ -115,13 +145,18 @@ export function Items() {
             </div>
             <div>
               <label>Category</label>
-              <input value={edit.category} onChange={(e) => setEdit({ ...edit, category: e.target.value })} />
+              <input
+                value={edit.category}
+                onChange={(e) => setEdit({ ...edit, category: e.target.value })}
+              />
             </div>
             <div>
               <label>Base unit</label>
               <select
                 value={edit.baseUnitId}
-                onChange={(e) => setEdit({ ...edit, baseUnitId: e.target.value })}
+                onChange={(e) =>
+                  setEdit({ ...edit, baseUnitId: e.target.value })
+                }
               >
                 {state.units.map((u) => (
                   <option key={u.id} value={u.id}>
@@ -134,7 +169,9 @@ export function Items() {
               <label>Purchase unit</label>
               <select
                 value={edit.purchaseUnitId}
-                onChange={(e) => setEdit({ ...edit, purchaseUnitId: e.target.value })}
+                onChange={(e) =>
+                  setEdit({ ...edit, purchaseUnitId: e.target.value })
+                }
               >
                 {state.units.map((u) => (
                   <option key={u.id} value={u.id}>

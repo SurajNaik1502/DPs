@@ -22,11 +22,12 @@ export function Login() {
     <div className="login-wrap">
       <section className="login-story">
         <div>
-          <div className="brand-mark">A</div>
+          <div className="brand-mark">D</div>
           <h1>Cost every gram of the tiffin.</h1>
           <p>
             Item-level masters, purchase batches, sub-recipes and menu costing —
-            built around Idli, Sambar and Coconut chutney as the working kitchen.
+            built around Idli, Sambar and Coconut chutney as the working
+            kitchen.
           </p>
         </div>
         <div className="login-chips">
@@ -38,10 +39,16 @@ export function Login() {
       </section>
       <form className="login-card" onSubmit={onSubmit}>
         <h2>Sign in</h2>
-        <p className="muted">User-wise authentication. Each role sees the kitchen they own.</p>
+        <p className="muted">
+          User-wise authentication. Each role sees the kitchen they own.
+        </p>
         {err && <p className="error">{err}</p>}
         <label>Username</label>
-        <input value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" />
+        <input
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          autoComplete="username"
+        />
         <label>Password</label>
         <input
           type="password"
