@@ -37,8 +37,7 @@ export default function App() {
         <Route path="/conversions" element={<Conversions />} />
         <Route path="/menu" element={<MenuPage />} />
         <Route path="/purchase" element={<PurchasePage />} />
-        <Route path="/sub-recipes" element={<Recipes kind="sub" />} />
-        <Route path="/menu-recipes" element={<Recipes kind="menu" />} />
+        <Route path="/component-recipes" element={<Recipes />} />
         <Route path="/reports" element={<Reports />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

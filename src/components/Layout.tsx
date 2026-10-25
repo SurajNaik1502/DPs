@@ -9,8 +9,11 @@ const links = [
   { to: "/conversions", label: "Unit conversion", need: "masters" as const },
   { to: "/menu", label: "Menu master", need: "masters" as const },
   { to: "/purchase", label: "Purchase", need: "purchase" as const },
-  { to: "/sub-recipes", label: "Sub recipes", need: "recipes" as const },
-  { to: "/menu-recipes", label: "Menu recipes", need: "recipes" as const },
+  {
+    to: "/component-recipes",
+    label: "Component recipes",
+    need: "recipes" as const,
+  },
   { to: "/reports", label: "Costing reports", need: "reports" as const },
 ];
 

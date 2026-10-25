@@ -25,15 +25,15 @@ export function Login() {
           <div className="brand-mark">D</div>
           <h1>Cost every gram of the tiffin.</h1>
           <p>
-            Item-level masters, purchase batches, sub-recipes and menu costing —
-            built around Idli, Sambar and Coconut chutney as the working
-            kitchen.
+            Item-level masters, purchase batches, component recipes and menu
+            costing — built around Idli, Sambar and Coconut chutney as the
+            working kitchen.
           </p>
         </div>
         <div className="login-chips">
           <span className="chip">Item master</span>
           <span className="chip">Unit conversion</span>
-          <span className="chip">Sub recipe</span>
+          <span className="chip">Component recipe</span>
           <span className="chip">Per kg costing</span>
         </div>
       </section>

@@ -60,6 +60,7 @@ export interface RecipeBatch {
   madeAt: string;
   qty: number;
   unitId: string;
+  cost?: number;
   notes?: string;
 }
 
@@ -85,6 +86,13 @@ export interface Recipe {
   menuGroup?: string;
 }
 
+export interface MenuPriceHistory {
+  id: string;
+  price: number;
+  changedAt: string;
+  note?: string;
+}
+
 export interface MenuItem {
   id: string;
   code: string;
@@ -95,6 +103,7 @@ export interface MenuItem {
   portionUnitId: string;
   sellingPrice: number;
   active: boolean;
+  priceHistory?: MenuPriceHistory[];
 }
 
 export interface AppState {

@@ -41,7 +41,7 @@ export function Dashboard() {
           <strong>
             {batter ? fmtMoney(costPerKg(state, batter).perKg ?? 0) : "—"}
           </strong>
-          <em>Sub recipe SR-001</em>
+          <em>Component recipe SR-001</em>
         </div>
         <div className="stat">
           <span>Live SKUs</span>
@@ -82,7 +82,7 @@ export function Dashboard() {
           )}
           <p className="muted" style={{ marginTop: 16 }}>
             Cost rolls from latest purchase prices, tax + freight through item
-            conversions into sub-recipes, then into the menu plate.
+            conversions into component recipes, then into the menu plate.
           </p>
         </div>
         <div className="card">
