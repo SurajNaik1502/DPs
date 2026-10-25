@@ -108,48 +108,158 @@ export function Menu() {
                 <th>Menu</th>
                 <th>Group</th>
                 <th>Recipe</th>
-                <th>Price</th>
+                <th>Latest price</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
-              {rows.map((menu) => (
-                <tr
-                  key={menu.id}
-                  onClick={() => setSelectedId(menu.id)}
-                  style={{ cursor: "pointer" }}
-                >
-                  <td>{menu.code}</td>
-                  <td>{menu.name}</td>
-                  <td>{menu.group}</td>
-                  <td>
-                    {state.recipes.find((r) => r.id === menu.recipeId)?.name ??
-                      "—"}
-                  </td>
-                  <td className="num">{fmtMoney(menu.sellingPrice)}</td>
-                  <td>
-                    <div className="row-actions">
-                      <button
-                        className="btn ghost small"
-                        onClick={() => setEdit(menu)}
-                      >
-                        Edit
-                      </button>
-                      {user?.role !== "kitchen" && (
-                        <button
-                          className="icon-btn"
-                          type="button"
-                          title="Delete menu"
-                          aria-label="Delete menu"
-                          onClick={() => handleDelete(menu.id)}
-                        >
-                          🗑
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {rows.map((menu) => {
+                const isExpanded = selectedId === menu.id;
+                const latestPrice =
+                  menu.priceHistory && menu.priceHistory.length > 0
+                    ? menu.priceHistory[menu.priceHistory.length - 1]
+                    : null;
+
+                return (
+                  <>
+                    <tr
+                      key={menu.id}
+                      onClick={() =>
+                        setSelectedId((prev) =>
+                          prev === menu.id ? null : menu.id,
+                        )
+                      }
+                      style={{ cursor: "pointer" }}
+                    >
+                      <td>{menu.code}</td>
+                      <td>{menu.name}</td>
+                      <td>{menu.group}</td>
+                      <td>
+                        {state.recipes.find((r) => r.id === menu.recipeId)
+                          ?.name ?? "—"}
+                      </td>
+                      <td className="num">
+                        {latestPrice
+                          ? fmtMoney(latestPrice.price)
+                          : fmtMoney(menu.sellingPrice)}
+                      </td>
+                      <td>
+                        <div className="row-actions">
+                          <button
+                            className="btn ghost small"
+                            onClick={() => setEdit(menu)}
+                          >
+                            Edit
+                          </button>
+                          <span className="caret">
+                            {isExpanded ? "▾" : "▸"}
+                          </span>
+                          {user?.role !== "kitchen" && (
+                            <button
+                              className="icon-btn"
+                              type="button"
+                              title="Delete menu"
+                              aria-label="Delete menu"
+                              onClick={() => handleDelete(menu.id)}
+                            >
+                              🗑
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                    {isExpanded && (
+                      <tr className="recipe-detail-row">
+                        <td colSpan={6}>
+                          <div className="recipe-detail-panel">
+                            <div className="recipe-detail-header">
+                              <div>
+                                <strong>{menu.name}</strong>
+                                <div className="muted">
+                                  {state.recipes.find(
+                                    (r) => r.id === menu.recipeId,
+                                  )?.name ?? "No recipe"}
+                                </div>
+                              </div>
+                              <div className="num">
+                                <div className="muted">Current price</div>
+                                <strong>{fmtMoney(menu.sellingPrice)}</strong>
+                              </div>
+                            </div>
+
+                            <div
+                              className="stack gap-small"
+                              style={{ marginBottom: 16 }}
+                            >
+                              <label>Update selling price</label>
+                              <div style={{ display: "flex", gap: 8 }}>
+                                <input
+                                  type="number"
+                                  min={0}
+                                  step="0.01"
+                                  defaultValue={menu.sellingPrice}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                      const val = Number(
+                                        (e.target as HTMLInputElement).value,
+                                      );
+                                      if (!Number.isNaN(val))
+                                        applyPrice(menu.id, val);
+                                    }
+                                  }}
+                                />
+                                <button
+                                  className="btn"
+                                  onClick={(e) => {
+                                    const input =
+                                      e.currentTarget.parentElement?.querySelector(
+                                        "input",
+                                      ) as HTMLInputElement | null;
+                                    const val = Number(
+                                      input?.value ?? menu.sellingPrice,
+                                    );
+                                    if (!Number.isNaN(val))
+                                      applyPrice(menu.id, val);
+                                  }}
+                                >
+                                  Save price
+                                </button>
+                              </div>
+                            </div>
+
+                            <h4 style={{ margin: "8px 0" }}>Price history</h4>
+                            {menu.priceHistory &&
+                            menu.priceHistory.length > 0 ? (
+                              <div className="recipe-batch-list">
+                                {menu.priceHistory
+                                  .slice()
+                                  .reverse()
+                                  .map((entry) => (
+                                    <div
+                                      key={entry.id}
+                                      className="recipe-batch-item"
+                                    >
+                                      <div className="recipe-batch-header">
+                                        <strong>{fmtMoney(entry.price)}</strong>
+                                        <span className="batch-tag">
+                                          {new Date(
+                                            entry.changedAt,
+                                          ).toLocaleString()}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  ))}
+                              </div>
+                            ) : (
+                              <p className="muted">No price history yet.</p>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </>
+                );
+              })}
             </tbody>
           </table>
         </div>

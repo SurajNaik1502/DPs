@@ -14,6 +14,7 @@ const links = [
     label: "Component recipes",
     need: "recipes" as const,
   },
+  { to: "/menu-recipes", label: "Menu recipes", need: "recipes" as const },
   { to: "/reports", label: "Costing reports", need: "reports" as const },
 ];
 
