@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Modal } from "../components/Modal";
 import { latestPurchaseRate } from "../lib/costing";
 import { fmtMoney, unitCode } from "../lib/units";
-import { uid, useStore } from "../store/db";
+import { saveItemToDb, uid, useStore } from "../store/db";
 import type { Item, ItemKind } from "../types";
 
 const empty = (): Item => ({
@@ -18,33 +18,51 @@ const empty = (): Item => ({
 });
 
 export function Items() {
-  const { state, save, user } = useStore();
+  const { state, user, refreshFromDb } = useStore();
   const [q, setQ] = useState("");
   const [edit, setEdit] = useState<Item | null>(null);
+  const [saving, setSaving] = useState(false);
   const rows = useMemo(
     () =>
-      state.items.filter(
-        (i) =>
-          i.name.toLowerCase().includes(q.toLowerCase()) ||
-          i.code.toLowerCase().includes(q.toLowerCase()) ||
-          i.category.toLowerCase().includes(q.toLowerCase()),
-      ),
+      [...state.items]
+        .sort((a, b) => {
+          const numA =
+            Number(String(a.code).replace(/^IRM-/, "")) ||
+            Number.MAX_SAFE_INTEGER;
+          const numB =
+            Number(String(b.code).replace(/^IRM-/, "")) ||
+            Number.MAX_SAFE_INTEGER;
+          return numA - numB || a.code.localeCompare(b.code);
+        })
+        .filter(
+          (i) =>
+            i.name.toLowerCase().includes(q.toLowerCase()) ||
+            i.code.toLowerCase().includes(q.toLowerCase()) ||
+            i.category.toLowerCase().includes(q.toLowerCase()),
+        ),
     [state.items, q],
   );
 
-  const persist = (item: Item) => {
-    const next = item.id
-      ? state.items.map((x) => (x.id === item.id ? item : x))
-      : [
-          ...state.items,
-          {
-            ...item,
-            id: uid("i"),
-            code: item.code || `IRM-${state.items.length + 1}`,
-          },
-        ];
-    save({ ...state, items: next });
-    setEdit(null);
+  const persist = async (item: Item) => {
+    try {
+      setSaving(true);
+
+      const payload = {
+        ...item,
+        id: item.id || uid("i"),
+        code: item.code || `IRM-${state.items.length + 1}`,
+        minStock: Number(item.minStock ?? 0),
+      };
+
+      await saveItemToDb(payload);
+      await refreshFromDb();
+      setEdit(null);
+    } catch (error) {
+      console.error(error);
+      alert(error instanceof Error ? error.message : "Failed to save item");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -185,8 +203,12 @@ export function Items() {
             <button className="btn ghost" onClick={() => setEdit(null)}>
               Cancel
             </button>
-            <button className="btn" onClick={() => persist(edit)}>
-              Save item
+            <button
+              className="btn"
+              onClick={() => persist(edit)}
+              disabled={saving}
+            >
+              {saving ? "Saving..." : "Save item"}
             </button>
           </div>
         </Modal>
